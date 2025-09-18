@@ -1,0 +1,24 @@
+[project]
+name = "ai-crm"
+version = "0.1.0"
+description = "crm with ai"
+authors = [
+    {name = "timofeytst"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi (>=0.116.1,<0.117.0)",
+    "yoyo-migrations (>=9.0.0,<10.0.0)",
+    "gunicorn (>=23.0.0,<24.0.0)",
+    "uvicorn (>=0.35.0,<0.36.0)",
+    "pydantic-settings (>=2.10.1,<3.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)"
+]
+
+[tool.poetry.scripts]
+api = "ai_crm:start_api"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

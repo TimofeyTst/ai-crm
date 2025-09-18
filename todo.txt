@@ -1,0 +1,33 @@
+1. Simple start FastAPI backend with healthcheck route from docker with poetry and logs
+
+Architecture:
+- api ✅
+- cron
+- queue
+- background (bots here)
+- internal (Mainteiner - AI CRM)
+    - service ✅
+    - repository ✅
+    - model ✅
+    - telegram (tg bot here)
+- pkg (Maintainer - templates & open source) ✅
+    - ...
+2. Simple connect to PostgreSQL mdb with best lib & master changing & host changing support
+3. Think about secure connection to distributed PostgreSQL
+4. Simple run cron
+5. Simple connect to distributed or self-hosted RabbitMQ
+6. Simple connect to distributed or self-hosted Redis
+
+-- Logic
+1. TG Bot with greetings about AI CRM and HR CRM, register with WL, search with AI voice recognition
+2. Call by number to my backend (TG call, phone call) like a searcher
+3. HRTech
+
+
+-- Metrics & observabilities
+7. prometheus adding for log tracing
+8. 
+
+*. Centrifugo connection
+
+-- CI/CD
