@@ -1,5 +1,8 @@
 1. Simple start FastAPI backend with healthcheck route from docker with poetry and logs
 
+Написать тг бота с CRM и AI распознаванием голоса а потом звонков,
+все это в distributed кластер mdb и разных подов с балансерами L3/L7
+
 Architecture:
 - api ✅
 - cron
@@ -31,3 +34,7 @@ Architecture:
 *. Centrifugo connection
 
 -- CI/CD
+
+2. Python JWT авторизация
+3. Golang templates
+4. Golang JWT
