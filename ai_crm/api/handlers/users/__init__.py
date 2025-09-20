@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from ai_crm.api.middlewares import token_based_verification as auth
 from ai_crm.pkg.models.exceptions import users
 from ai_crm.api.handlers.users import users_get_v1
+from ai_crm.pkg.context import web_context
 
 user_router = APIRouter(
     prefix="/users",
@@ -20,5 +21,5 @@ user_router = APIRouter(
     description="Get all users",
     dependencies=[Depends(auth.token_based_verification)],
 )
-async def read_all_city():
-    return await users_get_v1.handle()
+async def read_all_city(web_context: web_context.WebContext = Depends(web_context.get_web_context_dependency())):
+    return await users_get_v1.handle(web_context)

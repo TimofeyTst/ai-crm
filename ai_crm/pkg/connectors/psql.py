@@ -1,38 +1,56 @@
 import asyncpg
 import contextlib
+import asyncio
 
 from ai_crm.pkg.configuration import settings
+from ai_crm.pkg.configuration import context_vars
 from ai_crm.pkg.logger import logger as logger_lib
+from ai_crm.pkg import context
 
 logger = logger_lib.get_logger(__name__)
 
-# TODO: mdb connect
-@contextlib.asynccontextmanager
-async def get_connection(read_only=False):
-    dsn = settings.ai_crm_env.POSTGRES.DSN
-    currect_conn = None
-    # currect_conn, read_only_mode = _get_pg_pool_context()
+def _get_task_hash() -> int:
+    task = asyncio.current_task()
+    return hash(task)
 
-    if currect_conn:
-        yield currect_conn
+def _get_psql_pool_context():
+    psql_singleton_dict = context_vars.psql_pool_singleton.get({})
+    task_id = _get_task_hash()
+
+    conn, read_only_mode = psql_singleton_dict.get(task_id, (None, None))
+    logger.debug(f'task_id={task_id}, conn={conn}')
+
+    return conn, read_only_mode
+
+def _set_psql_pool_context(conn, read_only_mode):
+    psql_singleton_dict = context_vars.psql_pool_singleton.get({})
+    task_id = _get_task_hash()
+
+    psql_singleton_dict[task_id] = (conn, read_only_mode)
+    context_vars.psql_pool_singleton.set(psql_singleton_dict)
+
+@contextlib.asynccontextmanager
+async def get_connection(context: context.AnyContext, read_only=False):
+    current_conn, read_only_mode = _get_psql_pool_context()
+
+    if current_conn:
+        logger.info('using existing connection')
+        yield current_conn
     else:
         logger.info('creating a new RO connection' if read_only else 'creating a new connection')
-        pool = await asyncpg.create_pool(dsn)
-        # pool = context.pg.slave_pool if read_only else context.pg.master_pool 
+        pool = context.postgresql.get_pool(read_only)
 
         async with pool.acquire() as new_connection:
             try:
                 transaction = new_connection.transaction()
                 await transaction.start()
                 # Save the conn and connection mode to use in nesting
-                # _set_pg_pool_context(new_connection, read_only)
+                _set_psql_pool_context(new_connection, read_only)
                 yield new_connection
             except Exception as error:
                 logger.warning(f'an error occured: {error}, rolling back transaction {transaction}')
                 await transaction.rollback()
                 raise error
             finally:
-                pass
-                # Finally reset coro state
-                # _set_pg_pool_context(None, None)
+                _set_psql_pool_context(None, None)
 

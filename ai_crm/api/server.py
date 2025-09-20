@@ -14,6 +14,7 @@ from ai_crm.api import handlers
 from ai_crm.pkg.models.base import exception as base_exception
 from ai_crm.pkg.models.types import fastapi
 from ai_crm.pkg.configuration import settings
+from ai_crm.pkg.context.web_context import WebContext
 
 class Server:
     """Register all requirements for the correct work of server instance.
@@ -28,13 +29,18 @@ class Server:
 
     __app: FastAPI
     __app_name: str = settings.ai_crm_env.INSTANCE_APP_NAME
+    __web_context: WebContext
 
     def __init__(self, app: FastAPI):
         self.__app = app
+        self.__web_context = WebContext()
+        # Store web_context in app state for access in handlers
+        app.state.web_context = self.__web_context
+        
         self._register_routes(app)
-        self._register_events(app)
         self._register_middlewares(app)
         self._register_http_exceptions(app)
+        self._register_events(app)
 
     def get_app(self) -> FastAPI:
         return self.__app
@@ -43,12 +49,11 @@ class Server:
     def _register_routes(app: fastapi.instance) -> None:
         handlers.__router__.register_routes(app)
 
-    @staticmethod
-    def _register_events(app: fastapi.instance) -> None:
-        app.on_event("startup")(on_startup)
-        app.on_event("shutdown")(on_shutdown)
+    def _register_events(self, app: fastapi.instance) -> None:
+        app.on_event("startup")(self.__web_context.on_startup)
+        app.on_event("shutdown")(self.__web_context.on_shutdown)
 
-    def _register_middlewares(self, app) -> None:
+    def _register_middlewares(self, app: fastapi.instance) -> None:
         self.__register_cors_origins(app)
         self.__register_prometheus(app)
 
@@ -73,7 +78,7 @@ class Server:
             app_name=self.__app_name,
         )
 
-        self.__register_metrics_collector(app=app)
+        self.__register_metrics_collector(app)
 
     def __register_metrics_collector(
         self,
