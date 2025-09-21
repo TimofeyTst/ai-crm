@@ -5,7 +5,7 @@
 
 1. Architecture:
 - api ✅
-    - users
+    - users ✅
 - cron
     - users upload to s3
 - queue
