@@ -1,4 +1,5 @@
 from datetime import datetime
+import typing as tp
 
 from pydantic.fields import Field
 
@@ -25,3 +26,11 @@ class User(base_models.BaseModel):
     is_active: bool = UserFields.is_active
     created_at: datetime = UserFields.created_at
     updated_at: datetime = UserFields.updated_at
+
+class UserCreateRequest(base_models.BaseModel):
+    username: str = UserFields.username
+    email: str = UserFields.email
+    password_hash: str = UserFields.password_hash
+    first_name: tp.Optional[str] = Field(None, description="User first name.", example="John")
+    last_name: tp.Optional[str] = Field(None, description="User last name.", example="Doe")
+    is_active: bool = Field(True, description="User is active.", example=True)

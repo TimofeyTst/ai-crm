@@ -1,14 +1,7 @@
-from starlette.responses import JSONResponse
 
 from ai_crm.internal.services import users as users_service
 from ai_crm.pkg.context import web_context
-from fastapi import status
+from ai_crm.pkg.models.ai_crm import user as user_models
 
-async def handle(context: web_context.WebContext):
-    users = await users_service.get_users(context)
-    users_dict = [user.to_json_dict() for user in users]
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": "AI CRM OK USERS GET V1", "users": users_dict},
-    )
+async def handle(context: web_context.WebContext) -> list[user_models.User]:
+    return await users_service.get_users(context)
