@@ -12,18 +12,18 @@
     - from cron upload user to s3
 - background (bots here)
     - telegram (tg bot here)
-- internal (Mainteiner - AI CRM)
+- internal (Mainteiner - AI CRM) ✅
     - service ✅
     - repository ✅
     - model ✅
 - pkg (Maintainer - templates & open source) ✅
     - ...
 
-2. PostgreSQL
+2. PostgreSQL ✅
     - Simple connect to PostgreSQL mdb ✅
     - host changing slaves/masters support ✅
 
-3. Think about secure connection to distributed PostgreSQL
+3. Think about secure connection to distributed PostgreSQL ✅
 
 4. Simple run cron
 

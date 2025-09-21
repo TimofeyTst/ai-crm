@@ -21,5 +21,6 @@ user_router = APIRouter(
     description="Get all users",
     dependencies=[Depends(auth.token_based_verification)],
 )
-async def read_all_city(web_context: web_context.WebContext = Depends(web_context.get_web_context_dependency())):
+async def _users_get_v1(web_context: web_context.WebContext = Depends(web_context.get_web_context_dependency())):
     return await users_get_v1.handle(web_context)
+
