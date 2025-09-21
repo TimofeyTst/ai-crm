@@ -1,6 +1,6 @@
 from fastapi import Request
 
-from ai_crm.pkg.connectors.postgresql import PostgreSQL
+from ai_crm.pkg.connectors.postgresql import resource as PostgreSQLResource
 from ai_crm.pkg.logger import logger as logger_lib
 
 logger = logger_lib.get_logger(__name__)
@@ -10,7 +10,7 @@ class WebContext:
     """Web context that manages application resources and lifecycle."""
     
     def __init__(self):
-        self.postgresql = PostgreSQL()
+        self.postgresql = PostgreSQLResource.Resource()
         logger.info("WebContext initialized")
     
     async def on_startup(self) -> None:

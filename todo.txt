@@ -3,22 +3,32 @@
 Написать тг бота с CRM и AI распознаванием голоса а потом звонков,
 все это в distributed кластер mdb и разных подов с балансерами L3/L7
 
-Architecture:
+1. Architecture:
 - api ✅
+    - users
 - cron
+    - users upload to s3
 - queue
+    - from cron upload user to s3
 - background (bots here)
+    - telegram (tg bot here)
 - internal (Mainteiner - AI CRM)
     - service ✅
     - repository ✅
     - model ✅
-    - telegram (tg bot here)
 - pkg (Maintainer - templates & open source) ✅
     - ...
-2. Simple connect to PostgreSQL mdb with best lib & master changing & host changing support
+
+2. PostgreSQL
+    - Simple connect to PostgreSQL mdb ✅
+    - host changing slaves/masters support ✅
+
 3. Think about secure connection to distributed PostgreSQL
+
 4. Simple run cron
+
 5. Simple connect to distributed or self-hosted RabbitMQ
+
 6. Simple connect to distributed or self-hosted Redis
 
 -- Logic

@@ -5,7 +5,6 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from ai_crm.api.events import on_shutdown, on_startup
 from ai_crm.api.logger import EndpointFilter
 from ai_crm.api.middlewares import handle_http_exceptions
 from ai_crm.api.middlewares import metrics

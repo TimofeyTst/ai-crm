@@ -1,8 +1,6 @@
-import asyncpg
 import contextlib
 import asyncio
 
-from ai_crm.pkg.configuration import settings
 from ai_crm.pkg.configuration import context_vars
 from ai_crm.pkg.logger import logger as logger_lib
 from ai_crm.pkg import context

@@ -2,7 +2,7 @@ import pathlib
 import typing
 import urllib.parse
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import field_validator
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import find_dotenv
@@ -10,7 +10,7 @@ from dotenv import find_dotenv
 from ai_crm.pkg.models import logger
 
 class Postgresql(BaseSettings):
-    HOST: str = "localhost"
+    HOSTS: typing.Optional[str] = None
     PORT: PositiveInt = 5432
     USER: str = "postgres"
     PASSWORD: SecretStr = SecretStr("postgres")
@@ -19,24 +19,14 @@ class Postgresql(BaseSettings):
     MIN_CONNECTION: PositiveInt = 1
     MAX_CONNECTION: PositiveInt = 16
 
-    DSN: typing.Optional[str] = None
-
-    @model_validator(mode='before')
-    @classmethod
-    def build_dsn(cls, values: dict):
-        if isinstance(values, dict):
-            password = values.get('PASSWORD', '')
-            if hasattr(password, 'get_secret_value'):
-                password = password.get_secret_value()
-            
-            # Строим DSN вручную для совместимости
-            user = values.get('USER', 'postgres')
-            host = values.get('HOST', 'localhost')
-            port = values.get('PORT', 5432)
-            db_name = values.get('DATABASE_NAME', 'postgres')
-            
-            values["DSN"] = f"postgresql://{user}:{urllib.parse.quote_plus(str(password))}@{host}:{port}/{db_name}"
-        return values
+    def get_hosts_list(self) -> typing.List[str]:
+        if self.HOSTS:
+            return [host.strip() for host in self.HOSTS.split(',')]
+        return [self.HOST]
+    
+    def build_dsn_for_host(self, host: str) -> str:
+        password = self.PASSWORD.get_secret_value() if self.PASSWORD else ''
+        return f"postgresql://{self.USER}:{urllib.parse.quote_plus(str(password))}@{host}:{self.PORT}/{self.DATABASE_NAME}"
 
 
 class Logging(BaseSettings):
