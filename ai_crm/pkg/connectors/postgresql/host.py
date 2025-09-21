@@ -31,13 +31,13 @@ class PostgreSQLHost:
         self.replication_delay = 0
 
         try:
-            async with self.pool.acquire() as new_connection:
+            async with self.pool.acquire(timeout=10) as new_connection:
                 result = await new_connection.fetchrow(CHECK_SLAVE_QUERY)
                 self.is_healthy = True
                 self.is_master = not result['is_in_recovery']
                 self.replication_delay = result['replication_delay']
         except Exception as error:
-            logger.error(f"Error checking host {self.host} role: {error}")
+            logger.error(f"Error checking host {self.host} role: {str(type(error))}: {error}")
             raise error
 
     async def get_pool(self) -> asyncpg.Pool:

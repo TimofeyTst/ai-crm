@@ -51,7 +51,7 @@ class Resource:
             try:
                 await pg_host.open_pool_and_fill_status()
             except Exception as error:
-                logger.error(f"Failed to open pool and fill status for host {host}: {error}")
+                logger.error(f"Failed to open pool and fill status for host {host}: {str(type(error))}: {error}")
 
             if not pg_host.is_healthy:
                 logger.warning(f"Host {host} is unhealthy, skipping...")

@@ -45,6 +45,7 @@ async def get_connection(context: context.AnyContext, read_only=False):
                 # Save the conn and connection mode to use in nesting
                 _set_psql_pool_context(new_connection, read_only)
                 yield new_connection
+                await transaction.commit()
             except Exception as error:
                 logger.warning(f'an error occured: {error}, rolling back transaction {transaction}')
                 await transaction.rollback()
