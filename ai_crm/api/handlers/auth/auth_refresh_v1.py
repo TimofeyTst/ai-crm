@@ -4,8 +4,6 @@ from ai_crm.pkg.models.ai_crm import auth as auth_models
 
 
 async def handle(
-    context: web_context.WebContext,
-    request: auth_models.RefreshTokenRequest
+    context: web_context.WebContext, request: auth_models.RefreshTokenRequest
 ) -> auth_models.TokenResponse:
     return await auth_service.refresh(context, request.refresh_token)
-

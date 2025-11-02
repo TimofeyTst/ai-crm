@@ -1,5 +1,4 @@
 from functools import wraps
-from typing import List, Type, Union
 
 import asyncpg
 import pydantic
@@ -43,28 +42,30 @@ def collect_response(fn):
     async def inner(
         *args: object,
         **kwargs: object,
-    ) -> Union[List[Type[base_models.BaseModel]], Type[base_models.BaseModel]]:
+    ) -> list[type[base_models.BaseModel]] | type[base_models.BaseModel]:
         response = await fn(*args, **kwargs)
         if not response:
             raise postgres_exceptions.EmptyResult
 
         # Get return type annotation
         return_annotation = fn.__annotations__["return"]
-        
+
         # Create TypeAdapter for Pydantic v2
         type_adapter = pydantic.TypeAdapter(return_annotation)
-        
+
         # Convert response and validate with Pydantic v2
-        converted_response = await __convert_response(response=response, annotations=str(return_annotation))
+        converted_response = await __convert_response(
+            response=response, annotations=str(return_annotation)
+        )
         return type_adapter.validate_python(converted_response)
 
     return inner
 
 
-async def __convert_response(response: Union[asyncpg.Record, List[asyncpg.Record]], annotations: str):
+async def __convert_response(
+    response: asyncpg.Record | list[asyncpg.Record], annotations: str
+):
     if annotations.startswith("list"):
         return [dict(record) for record in response]
     else:
         return dict(response)
-
-

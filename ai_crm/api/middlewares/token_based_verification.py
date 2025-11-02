@@ -3,8 +3,10 @@
 from fastapi import Security
 from fastapi.security import APIKeyHeader
 
-from ai_crm.pkg.models.exceptions import token_verification as token_exceptions # TODO
 from ai_crm.pkg.configuration import settings
+from ai_crm.pkg.models.exceptions import (
+    token_verification as token_exceptions,
+)
 
 x_api_key_header = APIKeyHeader(name="X-ACCESS-TOKEN")
 

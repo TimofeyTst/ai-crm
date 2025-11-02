@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-import time
 import typing
-from datetime import date, datetime
-from typing import Any, Dict, List, Tuple, TypeVar
-from uuid import UUID
+from typing import Any, TypeVar
 
 import pydantic
+
 # from jsf import JSF # TODO: JSF
-from pydantic import UUID4
 
 Model = TypeVar("Model", bound="BaseModel")
 _T = TypeVar("_T")
@@ -18,11 +15,7 @@ _T = TypeVar("_T")
 
 class BaseModel(pydantic.BaseModel):
     def to_json_dict(self, exclude: set = None, **kwargs) -> dict[str, Any]:
-        return self.model_dump(
-            mode='json',
-            exclude=exclude,
-            **kwargs
-        )
+        return self.model_dump(mode="json", exclude=exclude, **kwargs)
 
     def migrate(
         self,
@@ -142,13 +135,10 @@ class BaseModel(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(
         # Allow creating new fields in model.
         validate_by_name=True,
-
         # Allow validate assignment.
         validate_assignment=True,
-
         # Remove trailing whitespace
-        str_strip_whitespace = True,
-
+        str_strip_whitespace=True,
         use_enum_values=True,
         # strict=False,
         # arbitrary_types_allowed=True,

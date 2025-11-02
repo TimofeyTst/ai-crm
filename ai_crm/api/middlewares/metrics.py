@@ -27,7 +27,7 @@ def metrics(request: Request) -> Response:
 
     del request  # unused
 
-    logger.error(f"METRICS NOT SETTED!")
+    logger.error("METRICS NOT SETTED!")
 
     return Response(
         # generate_latest(REGISTRY),

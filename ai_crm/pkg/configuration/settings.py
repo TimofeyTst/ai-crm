@@ -1,16 +1,16 @@
 import pathlib
-import typing
 import urllib.parse
 
+from dotenv import find_dotenv
 from pydantic import field_validator
 from pydantic.types import PositiveInt, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import find_dotenv
 
 from ai_crm.pkg.models import logger
 
+
 class Postgresql(BaseSettings):
-    HOSTS: typing.Optional[str] = None
+    HOSTS: str | None = None
     PORT: PositiveInt = 5432
     USER: str = "postgres"
     PASSWORD: SecretStr = SecretStr("postgres")
@@ -19,13 +19,13 @@ class Postgresql(BaseSettings):
     MIN_CONNECTION: PositiveInt = 1
     MAX_CONNECTION: PositiveInt = 16
 
-    def get_hosts_list(self) -> typing.List[str]:
+    def get_hosts_list(self) -> list[str]:
         if self.HOSTS:
-            return [host.strip() for host in self.HOSTS.split(',')]
+            return [host.strip() for host in self.HOSTS.split(",")]
         return [self.HOST]
-    
+
     def build_dsn_for_host(self, host: str) -> str:
-        password = self.PASSWORD.get_secret_value() if self.PASSWORD else ''
+        password = self.PASSWORD.get_secret_value() if self.PASSWORD else ""
         return f"postgresql://{self.USER}:{urllib.parse.quote_plus(str(password))}@{host}:{self.PORT}/{self.DATABASE_NAME}"
 
 
@@ -50,9 +50,11 @@ class APIServer(BaseSettings):
 
     # --- SECURITY SETTINGS ---
     X_ACCESS_TOKEN: SecretStr = SecretStr("secret")
-    
+
     # --- JWT SETTINGS ---
-    JWT_SECRET_KEY: SecretStr = SecretStr("your-secret-key-change-in-production")
+    JWT_SECRET_KEY: SecretStr = SecretStr(
+        "your-secret-key-change-in-production"
+    )
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_SECONDS: PositiveInt = 1800  # 30 min
     REFRESH_TOKEN_EXPIRE_SECONDS: PositiveInt = 604_800  # 7 days
@@ -72,7 +74,7 @@ class Settings(BaseSettings):
 
     # --- OTHER SETTINGS ---
     LOGGER: Logging
-    
+
     # --- DATA VOLUME ---
     DATA_VOLUME: pathlib.Path = pathlib.Path("./volume")
 
@@ -81,7 +83,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         arbitrary_types_allowed=True,
         case_sensitive=True,
-        env_nested_delimiter="__"
+        env_nested_delimiter="__",
     )
 
 

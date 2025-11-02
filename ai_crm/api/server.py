@@ -5,15 +5,14 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from ai_crm.api.logger import EndpointFilter
-from ai_crm.api.middlewares import handle_http_exceptions
-from ai_crm.api.middlewares import metrics
-from ai_crm.api.middlewares import prometheus
 from ai_crm.api import handlers
-from ai_crm.pkg.models.base import exception as base_exception
-from ai_crm.pkg.models.types import fastapi
+from ai_crm.api.logger import EndpointFilter
+from ai_crm.api.middlewares import handle_http_exceptions, metrics, prometheus
 from ai_crm.pkg.configuration import settings
 from ai_crm.pkg.context.web_context import WebContext
+from ai_crm.pkg.models.base import exception as base_exception
+from ai_crm.pkg.models.types import fastapi
+
 
 class Server:
     """Register all requirements for the correct work of server instance.
@@ -35,7 +34,7 @@ class Server:
         self.__web_context = WebContext()
         # Store web_context in app state for access in handlers
         app.state.web_context = self.__web_context
-        
+
         self._register_routes(app)
         self._register_middlewares(app)
         self._register_http_exceptions(app)
@@ -58,8 +57,13 @@ class Server:
 
     @staticmethod
     def _register_http_exceptions(app: fastapi.instance) -> None:
-        app.add_exception_handler(base_exception.BaseAPIException, handle_http_exceptions.handle_api_exceptions)
-        app.add_exception_handler(Exception, handle_http_exceptions.handle_internal_exception)
+        app.add_exception_handler(
+            base_exception.BaseAPIException,
+            handle_http_exceptions.handle_api_exceptions,
+        )
+        app.add_exception_handler(
+            Exception, handle_http_exceptions.handle_internal_exception
+        )
 
     @staticmethod
     def __register_cors_origins(app: fastapi.instance) -> None:
@@ -89,4 +93,6 @@ class Server:
 
     @staticmethod
     def __filter_logs(endpoint: str) -> None:
-        logging.getLogger("uvicorn.access").addFilter(EndpointFilter(endpoint=endpoint))
+        logging.getLogger("uvicorn.access").addFilter(
+            EndpointFilter(endpoint=endpoint)
+        )

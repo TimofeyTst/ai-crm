@@ -8,7 +8,9 @@ from ai_crm.pkg.models.base import exception as base_exceptions
 logger = logger_lib.get_logger(__name__)
 
 
-def handle_api_exceptions(request: Request, exc: base_exceptions.BaseAPIException):
+def handle_api_exceptions(
+    request: Request, exc: base_exceptions.BaseAPIException
+):
     """Handle all internal exceptions that inherited from
     :class:`.base_exceptions.BaseAPIException`.
 
@@ -26,7 +28,9 @@ def handle_api_exceptions(request: Request, exc: base_exceptions.BaseAPIExceptio
 
     logger.info(f"api exception: {str(type(exc))}: {exc}")
 
-    return JSONResponse(status_code=exc.http_code, content={"message": exc.error_msg})
+    return JSONResponse(
+        status_code=exc.http_code, content={"message": exc.error_msg}
+    )
 
 
 def handle_internal_exception(request: Request, exc: Exception):

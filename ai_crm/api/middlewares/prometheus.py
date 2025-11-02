@@ -1,11 +1,13 @@
-"""Prometheus middleware.""" # TODO prometheus
+"""Prometheus middleware."""  # TODO prometheus
 
 import time
-from typing import Tuple
 
 # from opentelemetry import trace
 # from prometheus_client import Counter, Gauge, Histogram
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.middleware.base import (
+    BaseHTTPMiddleware,
+    RequestResponseEndpoint,
+)
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Match
@@ -16,11 +18,12 @@ from ai_crm.api.middlewares.handle_http_exceptions import (
     handle_api_exceptions,
     handle_internal_exception,
 )
+from ai_crm.pkg.logger import logger as logger_lib
 from ai_crm.pkg.models.base import exception as base_exceptions
 from ai_crm.pkg.models.types import fastapi
-from ai_crm.pkg.logger import logger as logger_lib
 
 logger = logger_lib.get_logger(__name__)
+
 
 class PrometheusMiddleware(BaseHTTPMiddleware):
     """Middleware for collecting metrics from FastAPI application."""
@@ -109,7 +112,9 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         else:
             status_code = response.status_code
             after_time = time.perf_counter()
-            logger.info(f"Request processed in {after_time - before_time} seconds") # TODO: remove
+            logger.info(
+                f"Request processed in {after_time - before_time} seconds"
+            )  # TODO: remove
             # span = trace.get_current_span()
             # trace_id = trace.format_trace_id(span.get_span_context().trace_id)
 
@@ -134,7 +139,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         return response
 
     @staticmethod
-    def __get_path_template(request: Request) -> Tuple[str, bool]:
+    def __get_path_template(request: Request) -> tuple[str, bool]:
         for route in request.app.routes:
             match, _ = route.matches(request.scope)
             if match == Match.FULL:

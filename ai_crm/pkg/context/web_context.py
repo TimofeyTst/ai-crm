@@ -8,11 +8,11 @@ logger = logger_lib.get_logger(__name__)
 
 class WebContext:
     """Web context that manages application resources and lifecycle."""
-    
+
     def __init__(self):
         self.postgresql = PostgreSQLResource.Resource()
         logger.info("WebContext initialized")
-    
+
     async def on_startup(self) -> None:
         """Initialize all resources on startup."""
         logger.info("Starting up WebContext...")
@@ -20,7 +20,7 @@ class WebContext:
         await self.postgresql.on_startup()
 
         logger.info("WebContext startup completed")
-    
+
     async def on_shutdown(self) -> None:
         """Cleanup all resources on shutdown."""
         logger.info("Shutting down WebContext...")
@@ -29,9 +29,11 @@ class WebContext:
 
         logger.info("WebContext shutdown completed")
 
+
 def get_web_context_dependency():
     """Dependency function to get WebContext from FastAPI app state."""
+
     def _get_web_context(request: Request):
-        return getattr(request.app.state, 'web_context')
+        return request.app.state.web_context
 
     return _get_web_context

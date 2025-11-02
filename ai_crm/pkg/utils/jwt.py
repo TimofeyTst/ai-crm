@@ -1,14 +1,15 @@
 """JWT token utilities."""
 
 import datetime as dt
-from typing import Optional
 
 from jose import JWTError, jwt
 
 from ai_crm.pkg.configuration import settings
 
 
-def create_access_token(data: dict, expires_delta: Optional[dt.timedelta] = None) -> str:
+def create_access_token(
+    data: dict, expires_delta: dt.timedelta | None = None
+) -> str:
     """Create JWT access token.
 
     Args:
@@ -19,26 +20,28 @@ def create_access_token(data: dict, expires_delta: Optional[dt.timedelta] = None
         Encoded JWT token as string.
     """
     to_encode = data.copy()
-    
+
     if expires_delta:
         expire = dt.datetime.now(dt.UTC) + expires_delta
     else:
         expire = dt.datetime.now(dt.UTC) + dt.timedelta(
             seconds=settings.ai_crm_env.API.REFRESH_TOKEN_EXPIRE_SECONDS
         )
-    
-    to_encode.update({
-        "exp": expire,
-        "iat": dt.datetime.now(dt.UTC), # Issued at
-        "type": "access",
-    })
-    
+
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": dt.datetime.now(dt.UTC),  # Issued at
+            "type": "access",
+        }
+    )
+
     encoded_jwt = jwt.encode(
         to_encode,
         settings.ai_crm_env.API.JWT_SECRET_KEY.get_secret_value(),
-        algorithm=settings.ai_crm_env.API.JWT_ALGORITHM
+        algorithm=settings.ai_crm_env.API.JWT_ALGORITHM,
     )
-    
+
     return encoded_jwt
 
 
@@ -55,23 +58,25 @@ def create_refresh_token(data: dict) -> str:
     expire = dt.datetime.now(dt.UTC) + dt.timedelta(
         seconds=settings.ai_crm_env.API.REFRESH_TOKEN_EXPIRE_SECONDS
     )
-    
-    to_encode.update({
-        "exp": expire,
-        "iat": dt.datetime.now(dt.UTC), # Issued at
-        "type": "refresh",
-    })
-    
+
+    to_encode.update(
+        {
+            "exp": expire,
+            "iat": dt.datetime.now(dt.UTC),  # Issued at
+            "type": "refresh",
+        }
+    )
+
     encoded_jwt = jwt.encode(
         to_encode,
         settings.ai_crm_env.API.JWT_SECRET_KEY.get_secret_value(),
-        algorithm=settings.ai_crm_env.API.JWT_ALGORITHM
+        algorithm=settings.ai_crm_env.API.JWT_ALGORITHM,
     )
-    
+
     return encoded_jwt
 
 
-def decode_token(token: str, token_type: str = "access") -> Optional[dict]:
+def decode_token(token: str, token_type: str = "access") -> dict | None:
     """Decode and validate JWT token.
 
     Args:
@@ -85,14 +90,13 @@ def decode_token(token: str, token_type: str = "access") -> Optional[dict]:
         payload = jwt.decode(
             token,
             settings.ai_crm_env.API.JWT_SECRET_KEY.get_secret_value(),
-            algorithms=[settings.ai_crm_env.API.JWT_ALGORITHM]
+            algorithms=[settings.ai_crm_env.API.JWT_ALGORITHM],
         )
-        
+
         # Verify token type
         if payload.get("type") != token_type:
             return None
-        
+
         return payload
     except JWTError:
         return None
-

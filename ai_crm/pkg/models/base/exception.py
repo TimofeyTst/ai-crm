@@ -1,8 +1,9 @@
 from starlette import status
 
+
 class BaseError(Exception):
-    error_code = 'internal_error'
-    error_msg = 'Unhandled exception'
+    error_code = "internal_error"
+    error_msg = "Unhandled exception"
     http_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
     def __init__(self, error_code=None, error_msg=None, details=None):
@@ -14,10 +15,10 @@ class BaseError(Exception):
         self.details = details
 
     def __str__(self):
-        base_str = f'{self.__class__.__name__}[{self.http_code}]({self.error_code}): {self.error_msg}'
+        base_str = f"{self.__class__.__name__}[{self.http_code}]({self.error_code}): {self.error_msg}"
 
         if self.details:
-            return f'{base_str}<{self.details}>'
+            return f"{base_str}<{self.details}>"
 
         return base_str
 

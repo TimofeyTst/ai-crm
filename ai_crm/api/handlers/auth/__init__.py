@@ -1,11 +1,17 @@
-from starlette import status
 from fastapi import APIRouter, Depends
+from starlette import status
 
-from ai_crm.api.handlers.auth import auth_login_v1, auth_register_v1, auth_refresh_v1, auth_me_v1
+from ai_crm.api.handlers.auth import (
+    auth_login_v1,
+    auth_refresh_v1,
+    auth_register_v1,
+)
 from ai_crm.api.middlewares import jwt_auth
 from ai_crm.pkg.context import web_context
-from ai_crm.pkg.models.ai_crm import auth as auth_models, user as user_models
-from ai_crm.pkg.models.exceptions import auth as auth_exceptions, users as users_exceptions
+from ai_crm.pkg.models.ai_crm import auth as auth_models
+from ai_crm.pkg.models.ai_crm import user as user_models
+from ai_crm.pkg.models.exceptions import auth as auth_exceptions
+from ai_crm.pkg.models.exceptions import users as users_exceptions
 
 auth_router = APIRouter(
     prefix="/auth",
@@ -17,6 +23,7 @@ auth_router = APIRouter(
     },
 )
 
+
 @auth_router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
@@ -25,7 +32,9 @@ auth_router = APIRouter(
 )
 async def _auth_register_v1(
     request: auth_models.RegisterRequest,
-    web_context: web_context.WebContext = Depends(web_context.get_web_context_dependency())
+    web_context: web_context.WebContext = Depends(
+        web_context.get_web_context_dependency()
+    ),
 ):
     return await auth_register_v1.handle(web_context, request)
 
@@ -38,7 +47,9 @@ async def _auth_register_v1(
 )
 async def _auth_login_v1(
     request: auth_models.LoginRequest,
-    web_context: web_context.WebContext = Depends(web_context.get_web_context_dependency())
+    web_context: web_context.WebContext = Depends(
+        web_context.get_web_context_dependency()
+    ),
 ):
     return await auth_login_v1.handle(web_context, request)
 
@@ -51,7 +62,9 @@ async def _auth_login_v1(
 )
 async def _auth_refresh_v1(
     request: auth_models.RefreshTokenRequest,
-    web_context: web_context.WebContext = Depends(web_context.get_web_context_dependency())
+    web_context: web_context.WebContext = Depends(
+        web_context.get_web_context_dependency()
+    ),
 ):
     return await auth_refresh_v1.handle(web_context, request)
 
@@ -63,9 +76,9 @@ async def _auth_refresh_v1(
     response_model=user_models.User,
 )
 async def _auth_me_v1(
-    current_user: user_models.User = Depends(jwt_auth.get_current_user)
+    current_user: user_models.User = Depends(jwt_auth.get_current_user),
 ):
     return current_user
 
 
-# TODO: logout
+# TODO: logout + redis

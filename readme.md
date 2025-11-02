@@ -24,6 +24,42 @@ cd ci
 docker-compose -f docker-compose-dev.yaml up -d
 ```
 
+## Development
+
+### Install development dependencies
+
+```bash
+poetry install --with dev
+```
+
+### Linting and Formatting
+
+The project uses `ruff` for linting and formatting.
+
+**Check code quality:**
+> --fix to fix
+```bash
+poetry run ruff check .
+```
+
+**Format code:**
+```bash
+poetry run ruff format .
+```
+
+**Run all checks (lint + format):**
+```bash
+poetry run ruff check --fix . && poetry run ruff format .
+```
+
+### Code Style Rules
+
+- Maximum line length: **80 characters**
+- Import sorting: automatic (isort via ruff)
+- Unused imports: automatically removed
+- Quote style: double quotes
+- Indentation: 4 spaces
+
 ## Kubernetes TODO 
 
 ### Build Docker image for kubernetes 

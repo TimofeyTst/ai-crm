@@ -4,8 +4,6 @@ from ai_crm.pkg.models.ai_crm import auth as auth_models
 
 
 async def handle(
-    context: web_context.WebContext,
-    request: auth_models.LoginRequest
+    context: web_context.WebContext, request: auth_models.LoginRequest
 ) -> auth_models.TokenResponse:
     return await auth_service.login(context, request)
-

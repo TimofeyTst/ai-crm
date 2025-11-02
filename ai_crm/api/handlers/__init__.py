@@ -1,5 +1,5 @@
+from ai_crm.api.handlers import auth, gifts, users
 from ai_crm.pkg.models.base import router
-from ai_crm.api.handlers import users, gifts, auth
 
 __router__ = router.Router(
     routers=(

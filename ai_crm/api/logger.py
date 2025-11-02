@@ -1,5 +1,6 @@
 import logging
 
+
 class EndpointFilter(logging.Filter):
     endpoint: str
 
