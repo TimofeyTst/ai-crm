@@ -12,7 +12,7 @@ user_router = APIRouter(
     tags=["User"],
     responses={
         **users.UserNotFound.generate_openapi(),
-        **users.DuplicateUserName.generate_openapi(),
+        **users.UserAlreadyExists.generate_openapi(),
     },
 )
 

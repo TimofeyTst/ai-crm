@@ -15,6 +15,10 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VENV_IN_PROJECT=false \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=utf-8
+
 # Build & install dependencies
 WORKDIR /app
 COPY . .

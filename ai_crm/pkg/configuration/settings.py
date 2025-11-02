@@ -50,6 +50,12 @@ class APIServer(BaseSettings):
 
     # --- SECURITY SETTINGS ---
     X_ACCESS_TOKEN: SecretStr = SecretStr("secret")
+    
+    # --- JWT SETTINGS ---
+    JWT_SECRET_KEY: SecretStr = SecretStr("your-secret-key-change-in-production")
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_SECONDS: PositiveInt = 1800  # 30 min
+    REFRESH_TOKEN_EXPIRE_SECONDS: PositiveInt = 604_800  # 7 days
 
 
 class Centrifugo(BaseSettings):

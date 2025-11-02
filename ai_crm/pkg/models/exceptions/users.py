@@ -9,12 +9,17 @@ class UserNotFound(base_exceptions.BaseAPIException):
     http_code = status.HTTP_404_NOT_FOUND
 
 
-class DuplicateUserName(base_exceptions.BaseAPIException):
-    error_code = 'duplicate_user_name'
-    error_msg = 'User name already exists.'
+class UserAlreadyExists(base_exceptions.BaseAPIException):
+    error_code = 'user_already_exists'
+    error_msg = 'User with this email or username already exists.'
     http_code = status.HTTP_409_CONFLICT
 
 
+class InactiveUser(base_exceptions.BaseAPIException):
+    error_code = 'inactive_user'
+    error_msg = 'User account is inactive.'
+    http_code = status.HTTP_403_FORBIDDEN
+
 __constrains__ = {
-    "user_code_key": DuplicateUserName,
+    "user_code_key": UserAlreadyExists,
 }

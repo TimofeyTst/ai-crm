@@ -2,7 +2,7 @@
 -- depends: 
 
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id TEXT,
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(320) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
