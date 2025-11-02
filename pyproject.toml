@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [tool.poetry.scripts]
-api = "ai_crm:start_api"
+api = "ai_crm.api:create_app"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

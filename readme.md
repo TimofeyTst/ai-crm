@@ -1,4 +1,9 @@
 Production run
 ```
-gunicorn app:create_app -w $(nproc) -k uvicorn.workers.UvicornWorker
+poetry run gunicorn ai_crm.api:create_app -w 1 -k uvicorn.workers.UvicornWorker
+```
+
+Migrations
+```
+bash scripts/migrate.sh
 ```
