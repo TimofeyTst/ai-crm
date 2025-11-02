@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: ${INSTANCE_APP_NAME:-api}
+
+    build:
+      context: ..
+      dockerfile: ci/Dockerfile
+
+    ports:
+      - "127.0.0.1:8000:8000"
+
+    volumes:
+      - ../${DATA_VOLUME}:/app/volume
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    command: bash -c "poetry run gunicorn ai_crm.api:create_app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
+networks:
+  default:
+    external: true
+    name: ai-crm-network

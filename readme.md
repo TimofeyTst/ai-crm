@@ -11,8 +11,7 @@ docker network create ai-crm-network
 For production with external database:
 
 ```bash
-cd ci
-docker-compose -f docker-compose.yaml up -d
+docker-compose -f ci/docker-compose.yaml up -d --build
 ```
 
 ### Docker Compose (Development)
