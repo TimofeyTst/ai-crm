@@ -1,9 +1,37 @@
-Production run
+## Fast setup
+Create .env by .env.example copy
+
+Create docker network
 ```
-poetry run gunicorn ai_crm.api:create_app -w 1 -k uvicorn.workers.UvicornWorker
+docker network create ai-crm-network
 ```
 
-Migrations
+### Docker Compose (Production)
+
+For production with external database:
+
+```bash
+cd ci
+docker-compose -f docker-compose.yaml up -d
 ```
-bash scripts/migrate.sh
+
+### Docker Compose (Development)
+
+For local development with PostgreSQL:
+
+```bash
+cd ci
+docker-compose -f docker-compose-dev.yaml up -d
+```
+
+## Kubernetes TODO 
+
+### Build Docker image for kubernetes 
+
+```bash
+# Build image
+docker build -f ci/Dockerfile -t ai-crm:latest .
+
+# Run container
+docker run -p 8000:8000 ai-crm:latest
 ```

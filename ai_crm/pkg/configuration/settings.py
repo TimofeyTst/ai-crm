@@ -66,6 +66,9 @@ class Settings(BaseSettings):
 
     # --- OTHER SETTINGS ---
     LOGGER: Logging
+    
+    # --- DATA VOLUME ---
+    DATA_VOLUME: pathlib.Path = pathlib.Path("./volume")
 
     model_config = SettingsConfigDict(
         env_file=find_dotenv(".env"),

@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+
+  api:
+    container_name: ${INSTANCE_APP_NAME:-api}
+
+    build:
+      context: ..
+      dockerfile: ci/Dockerfile
+
+    ports:
+      - "127.0.0.1:5000:5000"
+
+    volumes:
+      - ../${DATA_VOLUME}:/app/volume
+      - ../migrations:/app/migrations
+      - ../scripts:/app/scripts
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        sleep 5 &&
+        poetry run yoyo-migrate apply --batch -d 'postgresql://postgres:postgres@postgres:5432/ai_crm' migrations &&
+        poetry run gunicorn ai_crm.api:create_app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000
+      "
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-crm-postgres-dev
+
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ai_crm
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: "local"
+
+networks:
+  default:
+    external: true
+    name: ai-crm-network
