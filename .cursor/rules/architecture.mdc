@@ -1,0 +1,280 @@
+---
+alwaysApply: true
+---
+
+# AI CRM - Project Architecture & Code Style Rules
+
+## Project Overview
+AI-powered CRM system with JWT authentication, built on FastAPI with PostgreSQL. The project follows a layered architecture pattern with clear separation of concerns.
+
+## Technology Stack
+- **Framework**: FastAPI (Python 3.13+)
+- **Database**: PostgreSQL (asyncpg)
+- **Authentication**: JWT (python-jose), bcrypt for password hashing
+- **Migrations**: yoyo-migrations
+- **Logging**: Custom logger with file and stream handlers
+- **Monitoring**: Prometheus metrics
+- **Containerization**: Docker, Docker Compose
+- **Package Manager**: Poetry
+- **Linting/Formatting**: Ruff (line length: 80 chars)
+
+## Project Structure
+
+```
+ai_crm/
+├── api/                    # API layer (FastAPI routes, handlers, middlewares)
+│   ├── handlers/          # Request handlers (business logic entry points)
+│   │   ├── auth/         # Authentication endpoints
+│   │   ├── users/        # User management endpoints
+│   │   └── and e.t.c
+│   ├── middlewares/      # HTTP middlewares (auth, metrics, exceptions)
+│   └── server.py         # FastAPI app initialization
+│
+├── internal/              # Internal business logic (not exposed as library)
+│   ├── services/         # Business logic layer
+│   └── repository/       # Data access layer (PostgreSQL)
+│       └── postgresql/   # PostgreSQL-specific implementations
+│
+└── pkg/                   # Reusable packages (could be extracted as library)
+    ├── configuration/    # Settings and configuration
+    ├── connectors/       # External service connectors (PostgreSQL pools)
+    ├── context/          # Request context (WebContext for resources)
+    ├── logger/           # Logging utilities
+    ├── models/           # Data models (Pydantic models)
+    └── utils/            # Utility functions (JWT, password hashing)
+```
+
+## Architecture Principles
+
+### 1. Layered Architecture
+- **API Layer** (`api/`): FastAPI routes, handlers, middlewares
+- **Service Layer** (`internal/services/`): Business logic
+- **Repository Layer** (`internal/repository/`): Data access
+- **Model Layer** (`pkg/models/`): Data models and validation
+
+### 2. Dependency Flow
+```
+Request → Handler → Service → Repository → PostgreSQL
+                    ↓
+                  Response Model
+```
+
+### 3. Request Handling Pattern
+Each endpoint follows this pattern:
+1. **Handler** (`api/handlers/*/__init__.py`): Defines route, calls handler function
+2. **Handler Function** (`api/handlers/*/*_v1.py`): Minimal logic, delegates to service
+3. **Service** (`internal/services/*.py`): Business logic
+4. **Repository** (`internal/repository/postgresql/*.py`): Database operations
+
+### 4. Context Management
+- `WebContext` manages application resources (PostgreSQL connections)
+- Stored in FastAPI app state: `app.state.web_context`
+- Accessed via dependency: `Depends(web_context.get_web_context_dependency())`
+
+## Code Style & Conventions
+
+### Import Organization
+1. Standard library imports
+2. Third-party imports
+3. Local application imports (`ai_crm.*`)
+
+### Naming Conventions
+- **Modules**: `snake_case` (e.g., `auth_register_v1.py`)
+- **Classes**: `PascalCase` (e.g., `WebContext`, `BaseModel`)
+- **Functions/Methods**: `snake_case` (e.g., `get_user_by_email`)
+- **Constants**: `UPPER_SNAKE_CASE` (e.g., `BCRYPT_MAX_LENGTH`)
+- **Private methods**: Leading underscore (e.g., `_preprocess_password`)
+
+### File Structure Patterns
+
+#### Handler Files (`api/handlers/*/__init__.py`)
+```python
+from fastapi import APIRouter, Depends
+from starlette import status
+
+from ai_crm.api.handlers.auth import auth_register_v1
+from ai_crm.pkg.context import web_context
+from ai_crm.pkg.models.ai_crm import auth as auth_models
+
+router = APIRouter(prefix="/auth", tags=["Auth"])
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def _auth_register_v1(
+    request: auth_models.RegisterRequest,
+    web_context: web_context.WebContext = Depends(
+        web_context.get_web_context_dependency()
+    ),
+):
+    return await auth_register_v1.handle(web_context, request)
+```
+
+#### Handler Implementation (`api/handlers/*/*_v1.py`)
+```python
+from ai_crm.internal.services import auth as auth_service
+from ai_crm.pkg.context import web_context
+from ai_crm.pkg.models.ai_crm import auth as auth_models
+
+async def handle(
+    context: web_context.WebContext,
+    request: auth_models.RegisterRequest,
+) -> auth_models.TokenResponse:
+    return await auth_service.register_user(context, request)
+```
+
+#### Service Layer (`internal/services/*.py`)
+```python
+from ai_crm.internal.repository.postgresql import users as users_repository
+from ai_crm.pkg import context
+from ai_crm.pkg.models.ai_crm import user as user_models
+
+async def get_user_by_email(
+    context: context.AnyContext,
+    email: str,
+) -> user_models.User:
+    return await users_repository.get_user_by_email(context, email)
+```
+
+#### Repository Layer (`internal/repository/postgresql/*.py`)
+```python
+from ai_crm.pkg.connectors.postgresql import psql
+from ai_crm.internal.repository.postgresql.collect_response import (
+    collect_response,
+)
+from ai_crm.pkg.models.ai_crm import user as user_models
+from ai_crm.pkg import context
+
+@collect_response
+async def get_user_by_email(
+    context: context.AnyContext, email: str
+) -> user_models.User:
+    async with psql.get_connection(context, read_only=True) as conn:
+        row = await conn.fetchrow(
+            "SELECT * FROM users WHERE email = $1", email
+        )
+        return row
+```
+
+### Model Definitions (`pkg/models/ai_crm/*.py`)
+```python
+from pydantic import Field
+from ai_crm.pkg.models.base import model as base_models
+
+class User(base_models.BaseModel):
+    id: int = Field(description="User id", example=1)
+    username: str = Field(description="Username", example="johndoe")
+    email: str = Field(description="User email", example="user@example.com")
+```
+
+### Exception Handling
+- Custom exceptions in `pkg/models/exceptions/`
+- All exceptions inherit from `BaseAPIException`
+- Include `error_code`, `error_msg`, `http_code`
+- Use `generate_openapi()` for OpenAPI documentation
+
+### Authentication Patterns
+
+#### JWT Authentication (for user-facing API)
+```python
+from ai_crm.api.middlewares import jwt_auth
+
+@router.get("/protected")
+async def protected_route(
+    current_user: user_models.User = Depends(jwt_auth.get_current_user),
+):
+    return current_user
+```
+
+#### Token-based Authentication (for service-to-service)
+```python
+from ai_crm.api.middlewares import token_based_verification as auth
+
+@router.get("/internal")
+async def internal_route(
+    dependencies=[Depends(auth.token_based_verification)],
+):
+    return {"status": "ok"}
+```
+
+## Database Patterns
+
+### Connection Management
+- Use `psql.get_connection(context, read_only=True)` for reads
+- Use `psql.get_connection(context)` for writes
+- Always use async context manager: `async with psql.get_connection(...)`
+
+### Query Execution
+- Use `@collect_response` decorator for automatic model conversion
+- Use parameterized queries with `$1`, `$2`, etc.
+- Return single row with `fetchrow()`, multiple with `fetch()`
+
+### Migration Management
+- Migrations in `migrations/` directory
+- Use yoyo-migrations
+- Run with: `scripts/migrate.sh`
+
+## Configuration
+
+### Settings (`pkg/configuration/settings.py`)
+- Use `pydantic-settings` with `BaseSettings`
+- Environment variables with `__` delimiter for nested settings
+- Example: `POSTGRES__HOST`, `API__JWT_SECRET_KEY`
+
+### Environment Variables
+- Load from `.env` file (via `python-dotenv`)
+- Use `SecretStr` for sensitive values
+- Access via `settings.ai_crm_env.API.JWT_SECRET_KEY.get_secret_value()`
+
+## Logging
+
+### Logger Usage
+```python
+from ai_crm.pkg.logger import logger as logger_lib
+
+logger = logger_lib.get_logger(__name__)
+logger.info("Message")
+logger.error("Error message")
+```
+
+### Log Format
+- File handler: Rotating file in `logs/` directory
+- Stream handler: Console output
+- Format includes: timestamp, level, module, function, line, message
+
+## Testing & Quality
+
+### Linting
+- Use `ruff` for linting and formatting
+- Line length: 80 characters
+- Auto-fix: `poetry run ruff check --fix .`
+- Format: `poetry run ruff format .`
+
+## Important Notes
+
+1. **FastAPI Depends Pattern**: B008 warnings are expected and can be ignored - using `Depends()` in function arguments is the standard FastAPI pattern.
+
+2. **Context Passing**: Always pass `context: context.AnyContext` through service and repository layers.
+
+3. **Model Conversion**: Use `@collect_response` decorator in repositories for automatic asyncpg → Pydantic model conversion.
+
+4. **Exception Handling**: Use custom exceptions from `pkg/models/exceptions/`, not generic HTTPException.
+
+5. **Type Hints**: Always use type hints for function parameters and return values.
+
+6. **Async/Await**: Use `async/await` for all database operations and I/O.
+
+7. **String Formatting**: Use double quotes (`"`) for strings (ruff format).
+
+8. **Import Aliases**: Use meaningful aliases (e.g., `import auth as auth_models`).
+
+## Future Architecture Plans
+
+- **Cron Jobs**: For scheduled tasks (e.g., user uploads to S3)
+- **Queue System**: RabbitMQ for background job processing
+- **Background Workers**: Telegram bot integration
+- **Redis**: For caching and session management (future)
+
+## Development Workflow
+
+1. Implement following architecture patterns
+2. Format & linter: `poetry run ruff check --fix . && poetry run ruff format .`
+3. Test locally with Docker Compose
