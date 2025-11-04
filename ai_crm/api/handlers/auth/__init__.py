@@ -14,7 +14,7 @@ from ai_crm.pkg.models.exceptions import auth as auth_exceptions
 from ai_crm.pkg.models.exceptions import users as users_exceptions
 
 auth_router = APIRouter(
-    prefix="/auth",
+    prefix="/v1/auth",
     tags=["Auth"],
     responses={
         **auth_exceptions.InvalidCredentials.generate_openapi(),

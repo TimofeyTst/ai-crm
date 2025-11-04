@@ -8,7 +8,7 @@ from ai_crm.pkg.models.ai_crm import user as user_models
 from ai_crm.pkg.models.exceptions import users
 
 user_router = APIRouter(
-    prefix="/users",
+    prefix="/v1/users",
     tags=["User"],
     responses={
         **users.UserNotFound.generate_openapi(),
@@ -18,7 +18,7 @@ user_router = APIRouter(
 
 
 @user_router.get(
-    "/v1",
+    "/list",
     status_code=status.HTTP_200_OK,
     description="Get all users",
     response_model=list[user_models.User],
@@ -33,7 +33,7 @@ async def _users_get_v1(
 
 
 @user_router.post(
-    "/v1/create",
+    "/create",
     status_code=status.HTTP_201_CREATED,
     description="Create new user",
     response_model=user_models.User,

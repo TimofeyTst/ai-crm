@@ -1,21 +1,19 @@
-version: '3.8'
-
 services:
 
   api:
-    container_name: ${INSTANCE_APP_NAME:-api}
+    container_name: ${INSTANCE_APP_NAME}-api
 
     build:
-      context: ..
+      context: .
       dockerfile: ci/Dockerfile
 
     ports:
       - "127.0.0.1:5000:5000"
 
     volumes:
-      - ../${DATA_VOLUME}:/app/volume
-      - ../migrations:/app/migrations
-      - ../scripts:/app/scripts
+      - ${DATA_VOLUME}:/app/volume
+      - ./migrations:/app/migrations
+      - ./scripts:/app/scripts
 
     depends_on:
       postgres:

@@ -2,7 +2,7 @@
 Create .env by .env.example copy
 
 Create docker network
-```
+```bash
 docker network create ai-crm-network
 ```
 
@@ -11,7 +11,7 @@ docker network create ai-crm-network
 For production with external database:
 
 ```bash
-docker-compose -f ci/docker-compose.yaml up -d --build
+docker-compose -f docker-compose.yaml up -d --build
 ```
 
 ### Docker Compose (Development)
@@ -19,11 +19,15 @@ docker-compose -f ci/docker-compose.yaml up -d --build
 For local development with PostgreSQL:
 
 ```bash
-cd ci
-docker-compose -f docker-compose-dev.yaml up -d
+docker-compose -f docker-compose-dev.yaml up -d --build
 ```
 
 ## Development
+
+### Migrations
+```bash
+bash scripts/migrate.sh
+```
 
 ### Install development dependencies
 
@@ -34,17 +38,6 @@ poetry install --with dev
 ### Linting and Formatting
 
 The project uses `ruff` for linting and formatting.
-
-**Check code quality:**
-> --fix to fix
-```bash
-poetry run ruff check .
-```
-
-**Format code:**
-```bash
-poetry run ruff format .
-```
 
 **Run all checks (lint + format):**
 ```bash

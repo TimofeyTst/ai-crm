@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
   api:
-    container_name: ${INSTANCE_APP_NAME:-api}
+    container_name: ${INSTANCE_APP_NAME}-api
 
     build:
-      context: ..
+      context: .
       dockerfile: ci/Dockerfile
 
     ports:
       - "127.0.0.1:8000:8000"
 
     volumes:
-      - ../${DATA_VOLUME}:/app/volume
+      - ${DATA_VOLUME}:/app/volume
 
     restart: unless-stopped
 

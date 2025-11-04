@@ -76,7 +76,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: RequestResponseEndpoint,
     ) -> Response:
-        method = request.method
+        method = request.method  # noqa: F841
         path_template, is_handled_path = self.__get_path_template(request)
 
         if self.__is_path_filtered(is_handled_path):
@@ -110,7 +110,7 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
                 return handle_api_exceptions(request=request, exc=e)
             return handle_internal_exception(request=request, exc=e)
         else:
-            status_code = response.status_code
+            status_code = response.status_code  # noqa: F841
             after_time = time.perf_counter()
             logger.info(
                 f"Request processed in {after_time - before_time} seconds"

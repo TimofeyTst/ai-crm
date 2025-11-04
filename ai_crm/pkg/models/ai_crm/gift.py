@@ -1,4 +1,3 @@
-
 from pydantic.fields import Field
 
 from ai_crm.pkg.models.base import model as base_models
@@ -29,9 +28,7 @@ class GiftCreateRequest(Gift):
 
 class GiftUpdateRequest(Gift):
     gift_id: str = GiftFields.gift_id
-    price: int | None = Field(
-        None, description="Gift price.", example=100
-    )
+    price: int | None = Field(None, description="Gift price.", example=100)
     total_count: int | None = Field(
         None, description="Gift total count.", example=100
     )

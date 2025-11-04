@@ -1,4 +1,3 @@
-
 import asyncpg
 
 from ai_crm.pkg.configuration import settings

@@ -1,6 +1,8 @@
 from fastapi import Request
 
 from ai_crm.pkg.connectors.postgresql import resource as PostgreSQLResource
+from ai_crm.pkg.connectors.storage import factory as storage_factory
+from ai_crm.pkg.connectors.storage.base import BaseStorage
 from ai_crm.pkg.logger import logger as logger_lib
 
 logger = logger_lib.get_logger(__name__)
@@ -11,6 +13,7 @@ class WebContext:
 
     def __init__(self):
         self.postgresql = PostgreSQLResource.Resource()
+        self.storage: BaseStorage | None = None
         logger.info("WebContext initialized")
 
     async def on_startup(self) -> None:
@@ -18,6 +21,9 @@ class WebContext:
         logger.info("Starting up WebContext...")
 
         await self.postgresql.on_startup()
+
+        self.storage = storage_factory.get_storage("local")
+        logger.info(f"Storage initialized: {self.storage.get_storage_type()}")
 
         logger.info("WebContext startup completed")
 

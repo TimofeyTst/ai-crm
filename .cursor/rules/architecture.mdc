@@ -9,7 +9,7 @@ AI-powered CRM system with JWT authentication, built on FastAPI with PostgreSQL.
 
 ## Technology Stack
 - **Framework**: FastAPI (Python 3.13+)
-- **Database**: PostgreSQL (asyncpg)
+- **Database**: PostgreSQL (asyncpg) with UUID for all primary keys
 - **Authentication**: JWT (python-jose), bcrypt for password hashing
 - **Migrations**: yoyo-migrations
 - **Logging**: Custom logger with file and stream handlers
@@ -17,6 +17,20 @@ AI-powered CRM system with JWT authentication, built on FastAPI with PostgreSQL.
 - **Containerization**: Docker, Docker Compose
 - **Package Manager**: Poetry
 - **Linting/Formatting**: Ruff (line length: 80 chars)
+
+## Database Conventions
+
+### Primary Keys and Foreign Keys
+- **ALL database IDs use UUID (stored as TEXT in PostgreSQL)**
+
+### Migration Pattern
+```sql
+CREATE TABLE users (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+    -- other fields
+);
+
+```
 
 ## Project Structure
 
@@ -73,6 +87,14 @@ Each endpoint follows this pattern:
 
 ## Code Style & Conventions
 
+### Self-Documenting Code Philosophy
+**Code should be self-explanatory through clear naming and structure.**
+
+- **Write comments ONLY for non-obvious logic**: Complex algorithms, business rules, workarounds, or "why" decisions
+- **DO NOT comment obvious code**: Variable assignments, simple loops, standard CRUD operations
+- **Prefer descriptive names over comments**: `calculate_user_monthly_revenue()` instead of `calc()` with comment
+- **NO inline comments for self-evident code**: If code needs explanation, refactor first
+
 ### Import Organization
 1. Standard library imports
 2. Third-party imports
@@ -84,6 +106,25 @@ Each endpoint follows this pattern:
 - **Functions/Methods**: `snake_case` (e.g., `get_user_by_email`)
 - **Constants**: `UPPER_SNAKE_CASE` (e.g., `BCRYPT_MAX_LENGTH`)
 - **Private methods**: Leading underscore (e.g., `_preprocess_password`)
+
+### API Route Naming Convention
+All API routes follow the pattern: `/<version>/<entity>/<action>`
+
+**Format**: `/v{N}/{entity}/{action}`
+
+Examples:
+- `/v1/auth/register` - user registration
+- `/v1/auth/login` - user login
+- `/v1/resumes/upload` - upload resume
+- `/v1/resumes/download/{id}` - download specific resume
+- `/v1/users/create` - create user
+- `/v1/users/list` - list users
+
+**Rules**:
+- Version is always `v1`, `v2`, etc.
+- Entity is plural for collections (`users`, `resumes`)
+- Action is a verb (`create`, `upload`, `download`, `list`, `delete`, `update`)
+- Path parameters use `{id}` format for resource identifiers
 
 ### File Structure Patterns
 

@@ -78,6 +78,16 @@ class Settings(BaseSettings):
     # --- DATA VOLUME ---
     DATA_VOLUME: pathlib.Path = pathlib.Path("./volume")
 
+    @field_validator("DATA_VOLUME")
+    @classmethod
+    def __create_data_volume_if_not_exist(
+        cls,
+        v: pathlib.Path,
+    ):
+        if not v.exists():
+            v.mkdir(exist_ok=True, parents=True)
+        return v
+
     model_config = SettingsConfigDict(
         env_file=find_dotenv(".env"),
         env_file_encoding="utf-8",

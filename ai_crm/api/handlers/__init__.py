@@ -1,4 +1,4 @@
-from ai_crm.api.handlers import auth, gifts, users
+from ai_crm.api.handlers import auth, gifts, resumes, users
 from ai_crm.pkg.models.base import router
 
 __router__ = router.Router(
@@ -6,5 +6,6 @@ __router__ = router.Router(
         auth.auth_router,
         users.user_router,
         gifts.gift_router,
+        resumes.resume_router,
     ),
 )

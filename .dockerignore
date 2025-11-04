@@ -10,8 +10,6 @@ dist
 build
 .git
 .gitignore
-.env.*
-!.env.example
 .vscode
 .idea
 *.swp
@@ -31,4 +29,4 @@ readme.md
 todo.txt
 ci
 alembic
-
+.ruff_cache/*
