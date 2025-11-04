@@ -103,6 +103,7 @@ async def parse_pdf_resume(
 
         logger.info(f"Extracted {len(text_content)} characters from PDF")
 
+        # TODO: add to prompt message about finding at least year in dates
         user_prompt = _get_user_prompt(text_content)
 
         parsed_resume = await openai_client.parse_with_gpt(

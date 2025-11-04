@@ -41,33 +41,62 @@ async def parse_with_gpt(
     """
     client = get_openai_client()
 
-    try:
-        logger.info(
-            f"Sending parsing request to OpenAI with model "
-            f"{settings.ai_crm_env.API.OPENAI_MODEL}"
-        )
+    model = settings.ai_crm_env.API.OPENAI_MODEL
+    max_tokens = settings.ai_crm_env.API.OPENAI_MAX_TOKENS
+    temperature = settings.ai_crm_env.API.OPENAI_TEMPERATURE
 
+    logger.info(
+        f"OpenAI Request [parse_with_gpt]: "
+        f"model={model}, "
+        f"max_tokens={max_tokens}, "
+        f"temperature={temperature}, "
+        f"response_format={response_model.__name__}"
+    )
+    logger.debug(f"System prompt: {system_prompt[:200]}...")
+    logger.debug(
+        f"User prompt length: {len(user_prompt)} chars, "
+        f"preview: {user_prompt[:200]}..."
+    )
+
+    try:
         response = await client.beta.chat.completions.parse(
-            model=settings.ai_crm_env.API.OPENAI_MODEL,
+            model=model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=settings.ai_crm_env.API.OPENAI_MAX_TOKENS,
-            temperature=settings.ai_crm_env.API.OPENAI_TEMPERATURE,
+            max_tokens=max_tokens,
+            temperature=temperature,
             response_format=response_model,
         )
 
         parsed_message = response.choices[0].message
+        usage = response.usage
+
+        if usage:
+            logger.info(
+                f"OpenAI Response [parse_with_gpt]: "
+                f"prompt_tokens={usage.prompt_tokens}, "
+                f"completion_tokens={usage.completion_tokens}, "
+                f"total_tokens={usage.total_tokens}"
+            )
+
         if not parsed_message.parsed:
-            logger.error(f"Failed to parse response: {parsed_message.refusal}")
+            logger.error(f"OpenAI parsing failed: {parsed_message.refusal}")
             raise ai_exceptions.ResumeParsingFailed
 
-        logger.info("Successfully parsed content with GPT")
+        logger.info(
+            f"Successfully parsed content with GPT, "
+            f"finish_reason={response.choices[0].finish_reason}"
+        )
         return parsed_message.parsed
 
+    except ai_exceptions.BaseAPIException:
+        raise
     except Exception as e:
-        logger.error(f"OpenAI API error: {e}")
+        logger.exception(
+            f"OpenAI API error in parse_with_gpt: {type(e).__name__}: {e}"
+        )
         raise ai_exceptions.OpenAIAPIError from e
 
 
@@ -91,28 +120,61 @@ async def personalize_with_gpt(
     """
     client = get_openai_client()
 
-    try:
-        logger.info("Sending personalization request to OpenAI")
+    model = settings.ai_crm_env.API.OPENAI_MODEL
+    max_tokens = settings.ai_crm_env.API.OPENAI_MAX_TOKENS
+    temperature = settings.ai_crm_env.API.OPENAI_TEMPERATURE
 
+    logger.info(
+        f"OpenAI Request [personalize_with_gpt]: "
+        f"model={model}, "
+        f"max_tokens={max_tokens}, "
+        f"temperature={temperature}, "
+        f"response_format={response_model.__name__}"
+    )
+    logger.debug(f"System prompt: {system_prompt[:200]}...")
+    logger.debug(
+        f"User prompt length: {len(user_prompt)} chars, "
+        f"preview: {user_prompt[:200]}..."
+    )
+
+    try:
         response = await client.beta.chat.completions.parse(
-            model=settings.ai_crm_env.API.OPENAI_MODEL,
+            model=model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=settings.ai_crm_env.API.OPENAI_MAX_TOKENS,
-            temperature=settings.ai_crm_env.API.OPENAI_TEMPERATURE,
+            max_tokens=max_tokens,
+            temperature=temperature,
             response_format=response_model,
         )
 
         parsed_message = response.choices[0].message
+        usage = response.usage
+
+        if usage:
+            logger.info(
+                f"OpenAI Response [personalize_with_gpt]: "
+                f"prompt_tokens={usage.prompt_tokens}, "
+                f"completion_tokens={usage.completion_tokens}, "
+                f"total_tokens={usage.total_tokens}"
+            )
+
         if not parsed_message.parsed:
-            logger.error(f"Failed to parse response: {parsed_message.refusal}")
+            logger.error(
+                f"OpenAI personalization failed: {parsed_message.refusal}. Parsed message: {parsed_message}"
+            )
             raise ai_exceptions.ResumePersonalizationFailed
 
-        logger.info("Successfully personalized resume with GPT")
+        logger.info(
+            f"Successfully personalized resume with GPT, "
+            f"finish_reason={response.choices[0].finish_reason}"
+        )
         return parsed_message.parsed
 
     except Exception as e:
-        logger.error(f"OpenAI personalization error: {e}")
+        logger.exception(
+            f"OpenAI API error in personalize_with_gpt: "
+            f"{type(e).__name__}: {e}"
+        )
         raise ai_exceptions.OpenAIAPIError from e

@@ -19,6 +19,43 @@ ALLOWED_MIME_TYPES = ["application/pdf"]
 ALLOWED_EXTENSIONS = [".pdf"]
 
 
+async def _get_resume_by_id(
+    context: context.AnyContext,
+    resume_id: str,
+    user_id: str,
+) -> resume_models.Resume:
+    """Not active resume also support"""
+    try:
+        resume_metadata = await resumes_repository.get_resume_by_id(
+            context, resume_id
+        )
+    except postgres_exceptions.EmptyResult as e:
+        raise resume_exceptions.ResumeNotFound from e
+
+    if resume_metadata.user_id != user_id:
+        logger.warning(
+            f"Access denied: User {user_id} attempted to personalize "
+            f"resume {resume_id}"
+        )
+        raise resume_exceptions.ResumeAccessDenied
+
+    return resume_metadata
+
+
+async def get_resume_by_id(
+    context: context.AnyContext,
+    resume_id: str,
+    user_id: str,
+) -> resume_models.Resume:
+    resume_metadata = await _get_resume_by_id(context, resume_id, user_id)
+
+    if not resume_metadata.is_active:
+        raise resume_exceptions.ResumeNotFound
+
+    return resume_metadata
+
+
+# TODO: move to table assets
 async def upload_resume(
     context: context.AnyContext,
     user_id: str,
@@ -86,22 +123,7 @@ async def download_resume(
         ResumeAccessDenied: If user doesn't own the resume
         FileNotFoundInStorage: If file doesn't exist in storage
     """
-    # Get resume metadata
-    try:
-        resume = await resumes_repository.get_resume_by_id(context, resume_id)
-    except postgres_exceptions.EmptyResult as e:
-        raise resume_exceptions.ResumeNotFound from e
-
-    # Check access rights
-    if resume.user_id != user_id:
-        logger.warning(
-            f"Access denied: User {user_id} "
-            f"attempted to access resume {resume_id}"
-        )
-        raise resume_exceptions.ResumeAccessDenied
-
-    if not resume.is_active:
-        raise resume_exceptions.ResumeNotFound
+    resume = await get_resume_by_id(context, resume_id, user_id)
 
     try:
         file_content = await context.storage.get_file(resume.storage_path)
@@ -135,21 +157,9 @@ async def delete_resume(
         ResumeNotFound: If resume doesn't exist
         ResumeAccessDenied: If user doesn't own the resume
     """
-    # Get resume metadata
-    try:
-        resume = await resumes_repository.get_resume_by_id(context, resume_id)
-    except postgres_exceptions.EmptyResult as e:
-        raise resume_exceptions.ResumeNotFound from e
-
-    if resume.user_id != user_id:
-        logger.warning(
-            f"Access denied: User {user_id} "
-            f"attempted to delete resume {resume_id}"
-        )
-        raise resume_exceptions.ResumeAccessDenied
+    await _get_resume_by_id(context, resume_id, user_id) # check if resume exists and user owns it
 
     success = await resumes_repository.delete_resume(context, resume_id)
-
     if success:
         logger.info(f"Resume deleted: {resume_id} by user {user_id}")
 

@@ -25,7 +25,6 @@ resume_router = APIRouter(
         **resume_exceptions.ResumeAccessDenied.generate_openapi(),
         **resume_exceptions.InvalidFileType.generate_openapi(),
         **resume_exceptions.FileTooLarge.generate_openapi(),
-        **ai_exceptions.AIServiceError.generate_openapi(),
         **ai_exceptions.ResumeParsingFailed.generate_openapi(),
         **ai_exceptions.ResumePersonalizationFailed.generate_openapi(),
     },

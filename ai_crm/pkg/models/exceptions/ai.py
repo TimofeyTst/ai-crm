@@ -1,12 +1,6 @@
 from ai_crm.pkg.models.base import exception as base_exceptions
 
 
-class AIServiceError(base_exceptions.BaseAPIException):
-    error_code = "ai_service_error"
-    error_msg = "AI service encountered an error"
-    http_code = 500
-
-
 class ResumeParsingFailed(base_exceptions.BaseAPIException):
     error_code = "resume_parsing_failed"
     error_msg = "Failed to parse resume content"

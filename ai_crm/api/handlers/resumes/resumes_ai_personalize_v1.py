@@ -19,21 +19,8 @@ async def handle(
 ) -> StreamingResponse:
     """Handle AI resume personalization request.
 
-    Workflow:
-    1. Parse original resume with GPT
-    2. Personalize based on job description
-    3. Generate DOCX file
-    4. Save to storage
-    5. Create database record (media_type='ai-cv')
-    6. Return DOCX file
-
-    Args:
-        context: Web context
-        request: Personalization request
-        user_id: Current user ID
-
     Returns:
-        StreamingResponse with DOCX file
+        StreamingResponse with PDF file
     """
     logger.info(
         f"Starting AI resume personalization for resume_id: "
