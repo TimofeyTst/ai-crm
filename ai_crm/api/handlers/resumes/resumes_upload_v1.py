@@ -1,6 +1,6 @@
 from fastapi import UploadFile
 
-from ai_crm.internal.services import resumes as resumes_service
+from ai_crm.internal.services.resumes import resumes as resumes_service
 from ai_crm.pkg.context import web_context
 from ai_crm.pkg.models.ai_crm import resume as resume_models
 

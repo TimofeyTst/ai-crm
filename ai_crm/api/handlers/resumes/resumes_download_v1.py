@@ -2,7 +2,7 @@ from io import BytesIO
 
 from fastapi.responses import StreamingResponse
 
-from ai_crm.internal.services import resumes as resumes_service
+from ai_crm.internal.services.resumes import resumes as resumes_service
 from ai_crm.pkg.context import web_context
 
 

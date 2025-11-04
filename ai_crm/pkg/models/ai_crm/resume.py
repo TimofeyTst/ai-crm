@@ -26,6 +26,7 @@ class ResumeFields:
         description="Storage path", example="resumes/2024/01/uuid.pdf"
     )
     storage_type: str = Field(description="Storage type", example="local")
+    media_type: str = Field(description="Media type", example="cv")
     title: str | None = Field(
         None, description="Resume title", example="Software Engineer Resume"
     )
@@ -52,6 +53,7 @@ class Resume(base_models.BaseModel):
     mime_type: str = ResumeFields.mime_type
     storage_path: str = ResumeFields.storage_path
     storage_type: str = ResumeFields.storage_type
+    media_type: str = ResumeFields.media_type
     title: str | None = ResumeFields.title
     description: str | None = ResumeFields.description
     is_active: bool = ResumeFields.is_active

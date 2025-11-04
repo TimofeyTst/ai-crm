@@ -16,6 +16,7 @@ async def create_resume(
     mime_type: str,
     storage_path: str,
     storage_type: str,
+    media_type: str = "cv",
     title: str | None = None,
     description: str | None = None,
 ) -> resume_models.Resume:
@@ -24,9 +25,10 @@ async def create_resume(
             """
             INSERT INTO resumes (
                 user_id, filename, original_filename, file_size,
-                mime_type, storage_path, storage_type, title, description
+                mime_type, storage_path, storage_type, media_type,
+                title, description
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
             """,
             user_id,
@@ -36,6 +38,7 @@ async def create_resume(
             mime_type,
             storage_path,
             storage_type,
+            media_type,
             title,
             description,
         )

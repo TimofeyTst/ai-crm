@@ -59,6 +59,12 @@ class APIServer(BaseSettings):
     ACCESS_TOKEN_EXPIRE_SECONDS: PositiveInt = 1800  # 30 min
     REFRESH_TOKEN_EXPIRE_SECONDS: PositiveInt = 604_800  # 7 days
 
+    # --- OPENAI SETTINGS ---
+    OPENAI_API_KEY: SecretStr = SecretStr("sk-your-api-key")
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    OPENAI_MAX_TOKENS: PositiveInt = 4096
+    OPENAI_TEMPERATURE: float = 0.7
+
 
 class Centrifugo(BaseSettings):
     HOST: str = "localhost"

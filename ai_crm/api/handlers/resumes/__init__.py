@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from starlette import status
 
 from ai_crm.api.handlers.resumes import (
+    resumes_ai_personalize_v1,
     resumes_delete_v1,
     resumes_download_v1,
     resumes_list_v1,
@@ -10,8 +11,10 @@ from ai_crm.api.handlers.resumes import (
 )
 from ai_crm.api.middlewares import jwt_auth
 from ai_crm.pkg.context import web_context
+from ai_crm.pkg.models.ai_crm import ai_resume as ai_resume_models
 from ai_crm.pkg.models.ai_crm import resume as resume_models
 from ai_crm.pkg.models.ai_crm import user as user_models
+from ai_crm.pkg.models.exceptions import ai as ai_exceptions
 from ai_crm.pkg.models.exceptions import resumes as resume_exceptions
 
 resume_router = APIRouter(
@@ -22,6 +25,9 @@ resume_router = APIRouter(
         **resume_exceptions.ResumeAccessDenied.generate_openapi(),
         **resume_exceptions.InvalidFileType.generate_openapi(),
         **resume_exceptions.FileTooLarge.generate_openapi(),
+        **ai_exceptions.AIServiceError.generate_openapi(),
+        **ai_exceptions.ResumeParsingFailed.generate_openapi(),
+        **ai_exceptions.ResumePersonalizationFailed.generate_openapi(),
     },
 )
 
@@ -93,4 +99,22 @@ async def _resumes_delete_v1(
 ):
     return await resumes_delete_v1.handle(
         web_context, resume_id, current_user.id
+    )
+
+
+@resume_router.post(
+    "/ai/personalize",
+    status_code=status.HTTP_200_OK,
+    description="Personalize resume using AI based on job description",
+    response_class=StreamingResponse,
+)
+async def _resumes_ai_personalize_v1(
+    request: ai_resume_models.PersonalizeResumeRequest,
+    current_user: user_models.User = Depends(jwt_auth.get_current_user),
+    web_context: web_context.WebContext = Depends(
+        web_context.get_web_context_dependency()
+    ),
+):
+    return await resumes_ai_personalize_v1.handle(
+        web_context, request, current_user.id
     )

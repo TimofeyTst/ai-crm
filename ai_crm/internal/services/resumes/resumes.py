@@ -7,12 +7,8 @@ from ai_crm.pkg import context
 from ai_crm.pkg.connectors.postgresql import psql
 from ai_crm.pkg.logger import logger as logger_lib
 from ai_crm.pkg.models.ai_crm import resume as resume_models
-from ai_crm.pkg.models.exceptions import (
-    postgres as postgres_exceptions,
-)
-from ai_crm.pkg.models.exceptions import (
-    resumes as resume_exceptions,
-)
+from ai_crm.pkg.models.exceptions import postgres as postgres_exceptions
+from ai_crm.pkg.models.exceptions import resumes as resume_exceptions
 
 logger = logger_lib.get_logger(__name__)
 
@@ -67,6 +63,7 @@ async def upload_resume(
             mime_type="application/pdf",
             storage_path=storage_path,
             storage_type=context.storage.get_storage_type(),
+            media_type="cv",
             title=title,
             description=description,
         )
